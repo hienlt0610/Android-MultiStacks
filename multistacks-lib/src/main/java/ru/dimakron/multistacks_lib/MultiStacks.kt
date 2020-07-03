@@ -82,7 +82,7 @@ class MultiStacks private constructor(builder: Builder) {
                     currentStack.remove(f)
                     fragmentManager.findFragmentByTag(f.tag)?.let { transaction.remove(it) }
                 }
-
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
         transaction.add(containerId, fragment, fragment.generateTag())
         transaction.commit()
 
@@ -109,7 +109,6 @@ class MultiStacks private constructor(builder: Builder) {
         for (i in 0 until depth) {
             fragmentManager.findFragmentByTag(currentStack.removeAt(currentStack.size - 1).tag)?.let { transaction.remove(it) }
         }
-
         var fragment = reattachPreviousFragment(transaction)
         if (fragment == null) {
             fragment = currentStack.lastOrNull()?: rootFragmentInitializers[selectedTabIndex].invoke()
@@ -206,7 +205,10 @@ class MultiStacks private constructor(builder: Builder) {
 
     private fun reattachPreviousFragment(transaction: FragmentTransaction): Fragment? {
         val fragment = fragmentStacks.getOrNull(selectedTabIndex)?.lastOrNull()?.let { fragmentManager.findFragmentByTag(it.tag) }
-        fragment?.let { transaction.attach(it) }
+        fragment?.let {
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+            transaction.attach(it)
+        }
         return fragment
     }
 
